@@ -1,0 +1,234 @@
+{
+  "admin": {
+    "id": "usr_admin_01",
+    "email": "Blessed",
+    "passwordHash": "3240b50eee75b447f35298fbfa4cb5a488ffc0e6a062b75c09a1a1ce38750ba3444d76add779365b11c05ed73320ec4e32de8d455a3c604ef6ec36b6593e973f",
+    "salt": "e1bfaa06f8e7ad71c71879725ad15b1a",
+    "name": "BLESSED DAVID OGLEKWU",
+    "sessionTokens": [
+      "8827a502d47d3b63484576adba05ef7cd889208191c2a25c36d4cf0311959e08"
+    ]
+  },
+  "settings": {
+    "portfolioName": "BLESSED DAVID OGLEKWU",
+    "ownerName": "BLESSED DAVID OGLEKWU",
+    "ownerTitle": "Software Architect & Digital Systems Vault",
+    "bio": "Welcome to my official digital vault. Here you can explore my verified credentials, documents, architecture blueprints, production code repositories, and creative work.",
+    "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "email": "blessedogle52@gmail.com",
+    "phone": "",
+    "location": "Nigeria",
+    "socialLinks": {
+      "github": "https://github.com",
+      "linkedin": "https://linkedin.com",
+      "twitter": "https://x.com"
+    },
+    "defaultVisibility": "public",
+    "defaultDownloadAllowed": true,
+    "publicIntroduction": "Welcome to my official digital vault and portfolio. Explore my verified certifications, project architecture blueprints, code repositories, and creative work.",
+    "visibleCategories": [
+      "CV and Resume",
+      "Web Development",
+      "Certificates",
+      "Graphic Design",
+      "Video Projects",
+      "Documents",
+      "Resources and Links"
+    ]
+  },
+  "folders": [
+    {
+      "id": "fld_cv",
+      "name": "CV & Professional Credentials",
+      "category": "CV and Resume",
+      "description": "Verified resumes, credentials, and work history documents.",
+      "color": "#F5C518",
+      "icon": "FileText",
+      "createdAt": "2026-10-13T17:53:28.626Z",
+      "updatedAt": "2026-10-13T17:53:28.626Z"
+    },
+    {
+      "id": "fld_webdev",
+      "name": "Web Engineering & Architecture",
+      "category": "Web Development",
+      "description": "System specifications, blueprints, and production web apps.",
+      "color": "#3B82F6",
+      "icon": "Code",
+      "createdAt": "2026-10-13T17:53:28.626Z",
+      "updatedAt": "2026-10-13T17:53:28.626Z"
+    },
+    {
+      "id": "fld_design",
+      "name": "Brand & Graphic Design",
+      "category": "Graphic Design",
+      "description": "Visual identities, vector assets, and design systems.",
+      "color": "#EC4899",
+      "icon": "Palette",
+      "createdAt": "2026-10-13T17:53:28.626Z",
+      "updatedAt": "2026-10-13T17:53:28.626Z"
+    },
+    {
+      "id": "fld_certs",
+      "name": "Verified Certifications",
+      "category": "Certificates",
+      "description": "Official industry licenses and cloud architecture certificates.",
+      "color": "#10B981",
+      "icon": "Award",
+      "createdAt": "2026-10-13T17:53:28.626Z",
+      "updatedAt": "2026-10-13T17:53:28.626Z"
+    },
+    {
+      "id": "fld_private_vault",
+      "name": "Private Vault & Tax Documents",
+      "category": "Documents",
+      "description": "Confidential administrative records strictly for internal vault use.",
+      "color": "#EF4444",
+      "icon": "Lock",
+      "createdAt": "2026-10-13T17:53:28.626Z",
+      "updatedAt": "2026-10-13T17:53:28.626Z"
+    }
+  ],
+  "files": [
+    {
+      "id": "file_cv_01",
+      "originalName": "Alex_Vance_Software_Architect_CV.pdf",
+      "filename": "sample_resume.pdf",
+      "storedPath": "/app/applet/data/uploads/sample_resume.pdf",
+      "mimeType": "application/pdf",
+      "size": 1146,
+      "title": "Executive CV & Technical Leadership Resume",
+      "description": "Comprehensive curriculum vitae detailing enterprise system architecture experience, publications, and cloud projects.",
+      "category": "CV and Resume",
+      "folderId": "fld_cv",
+      "tags": [
+        "Resume",
+        "FullStack",
+        "Architect",
+        "Credentials"
+      ],
+      "visibility": "public",
+      "downloadAllowed": true,
+      "downloadsCount": 142,
+      "viewsCount": 389,
+      "isDeleted": true,
+      "createdAt": "2026-10-09T17:53:28.626Z",
+      "updatedAt": "2026-10-14T10:20:17.747Z",
+      "deletedAt": "2026-10-14T10:20:17.747Z"
+    },
+    {
+      "id": "file_spec_02",
+      "originalName": "Cloud_Architecture_Specification_v2.md",
+      "filename": "cloud_architecture_spec.md",
+      "storedPath": "/app/applet/data/uploads/cloud_architecture_spec.md",
+      "mimeType": "text/markdown",
+      "size": 773,
+      "title": "Cloud Architecture & Vault Security Spec",
+      "description": "Technical whitepaper on zero-trust authentication, storage access boundaries, and high-concurrency event loops.",
+      "category": "Web Development",
+      "folderId": "fld_webdev",
+      "tags": [
+        "Security",
+        "Architecture",
+        "Whitepaper",
+        "DevOps"
+      ],
+      "visibility": "public",
+      "downloadAllowed": true,
+      "downloadsCount": 88,
+      "viewsCount": 245,
+      "isDeleted": true,
+      "createdAt": "2026-10-10T17:53:28.626Z",
+      "updatedAt": "2026-10-14T10:20:16.150Z",
+      "deletedAt": "2026-10-14T10:20:16.150Z"
+    },
+    {
+      "id": "file_design_03",
+      "originalName": "Fintech_Dashboard_Aura_Design.svg",
+      "filename": "fintech_dashboard_design.svg",
+      "storedPath": "/app/applet/data/uploads/fintech_dashboard_design.svg",
+      "mimeType": "image/svg+xml",
+      "size": 2336,
+      "title": "Aura Fintech High-Density Analytics UI",
+      "description": "Vector UI design blueprint for next-generation algorithmic wealth management platform.",
+      "category": "Graphic Design",
+      "folderId": "fld_design",
+      "tags": [
+        "UI/UX",
+        "Vector",
+        "Fintech",
+        "DesignSystem"
+      ],
+      "visibility": "public",
+      "downloadAllowed": false,
+      "downloadsCount": 0,
+      "viewsCount": 514,
+      "isDeleted": true,
+      "createdAt": "2026-10-11T17:53:28.626Z",
+      "updatedAt": "2026-10-14T10:20:13.826Z",
+      "deletedAt": "2026-10-14T10:20:13.826Z"
+    },
+    {
+      "id": "file_cert_04",
+      "originalName": "AWS_Solutions_Architect_Professional.svg",
+      "filename": "aws_solutions_architect_certificate.svg",
+      "storedPath": "/app/applet/data/uploads/aws_solutions_architect_certificate.svg",
+      "mimeType": "image/svg+xml",
+      "size": 2057,
+      "title": "AWS Certified Solutions Architect — Professional",
+      "description": "Official credential validating multi-region hybrid architecture and enterprise resilience governance.",
+      "category": "Certificates",
+      "folderId": "fld_certs",
+      "tags": [
+        "AWS",
+        "Certification",
+        "Cloud",
+        "Verified"
+      ],
+      "visibility": "public",
+      "downloadAllowed": true,
+      "downloadsCount": 65,
+      "viewsCount": 412,
+      "isDeleted": true,
+      "createdAt": "2026-10-12T17:53:28.626Z",
+      "updatedAt": "2026-10-14T10:20:11.619Z",
+      "deletedAt": "2026-10-14T10:20:11.619Z"
+    },
+    {
+      "id": "file_priv_05",
+      "originalName": "Confidential_Tax_W8_2026.pdf",
+      "filename": "sample_resume.pdf",
+      "storedPath": "/app/applet/data/uploads/sample_resume.pdf",
+      "mimeType": "application/pdf",
+      "size": 46080,
+      "title": "Confidential Tax & Entity Governance Records",
+      "description": "Internal private vault documentation. Not visible to the public under any circumstances.",
+      "category": "Documents",
+      "folderId": "fld_private_vault",
+      "tags": [
+        "Confidential",
+        "Tax",
+        "Private"
+      ],
+      "visibility": "private",
+      "downloadAllowed": false,
+      "downloadsCount": 0,
+      "viewsCount": 3,
+      "isDeleted": true,
+      "createdAt": "2026-10-13T17:53:28.626Z",
+      "updatedAt": "2026-10-14T10:20:06.819Z",
+      "deletedAt": "2026-10-14T10:20:06.819Z"
+    }
+  ],
+  "links": [],
+  "messages": [
+    {
+      "id": "msg_01",
+      "name": "Sarah Chen (Tech Recruiter)",
+      "email": "sarah.chen@techventures.co",
+      "subject": "Senior Architecture Role Inquiry",
+      "message": "Hello Alex, I reviewed your CV and the Aura Fintech architecture blueprint in your vault. We are looking for a Lead Architect for our new cloud infrastructure team. Would love to connect!",
+      "createdAt": "2026-10-12T17:53:28.626Z",
+      "read": false
+    }
+  ]
+}

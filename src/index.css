@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #050608;
+    --card-main: #0B0E14;
+    --card-hover: #121620;
+    --accent-red: #FF003C;
+    --accent-red-hover: #FF1E46;
+    --accent-red-glow: rgba(255, 0, 60, 0.45);
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border-subtle: #1C1217;
+    --border-neon-red: rgba(255, 0, 60, 0.4);
+  }
+  
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #050608;
+    color: #F8FAFC;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050608;
+}
+::-webkit-scrollbar-thumb {
+  background: #25121A;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 0, 60, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF003C;
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.8);
+}
+
+/* Authentic Neon Red and Black Panels & Effects */
+.vault-panel {
+  background-color: #0B0E14;
+  border: 1px solid #20131A;
+  position: relative;
+}
+
+.vault-panel-hover {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vault-panel-hover:hover {
+  border-color: rgba(255, 0, 60, 0.65);
+  box-shadow: 0 0 30px -5px rgba(255, 0, 60, 0.35), inset 0 0 15px -8px rgba(255, 0, 60, 0.2);
+  transform: translateY(-2px);
+}
+
+.neon-red-glow {
+  box-shadow: 0 0 25px -2px rgba(255, 0, 60, 0.55), 0 0 50px -10px rgba(255, 0, 60, 0.25);
+}
+
+.neon-red-glow-subtle {
+  box-shadow: 0 0 15px -3px rgba(255, 0, 60, 0.3);
+}
+
+.neon-red-glow-strong {
+  box-shadow: 0 0 35px 2px rgba(255, 0, 60, 0.7), 0 0 60px -5px rgba(255, 30, 70, 0.4);
+}
+
+.neon-text-red {
+  color: #FF003C;
+  text-shadow: 0 0 15px rgba(255, 0, 60, 0.6), 0 0 30px rgba(255, 0, 60, 0.3);
+}
+
+.neon-text-gradient {
+  background: linear-gradient(135deg, #FFFFFF 20%, #FF4D6D 70%, #FF003C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.neon-badge-red {
+  background: rgba(255, 0, 60, 0.12);
+  color: #FF4D6D;
+  border: 1px solid rgba(255, 0, 60, 0.45);
+  box-shadow: 0 0 12px -2px rgba(255, 0, 60, 0.25);
+}
+
+.neon-btn-red {
+  background: linear-gradient(135deg, #FF003C 0%, #D60033 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 0 20px -3px rgba(255, 0, 60, 0.5);
+  transition: all 0.2s ease;
+}
+
+.neon-btn-red:hover {
+  background: linear-gradient(135deg, #FF1E46 0%, #E60033 100%);
+  box-shadow: 0 0 30px 0px rgba(255, 0, 60, 0.75);
+  transform: translateY(-1px);
+}

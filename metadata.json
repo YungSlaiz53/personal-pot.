@@ -1,0 +1,6 @@
+{
+  "name": "MyVault — Personal Portfolio & Digital File Manager",
+  "description": "A private online digital vault and shareable public portfolio to upload, organize, preview, and share documents, creative assets, videos, and project links.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
