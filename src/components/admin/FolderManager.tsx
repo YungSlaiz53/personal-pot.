@@ -11,7 +11,8 @@ import {
   X,
   AlertCircle,
   Check,
-  ChevronRight
+  ChevronRight,
+  Globe
 } from 'lucide-react';
 import { VaultFolder, VaultFile } from '../../types/vault';
 import { formatBytes, formatDate } from '../../utils/formatters';
@@ -38,14 +39,14 @@ const PRESET_CATEGORIES = [
 ];
 
 const PRESET_COLORS = [
-  '#F5C518', // Gold
+  '#FF003C', // Neon Red
   '#3B82F6', // Blue
   '#EC4899', // Pink
   '#10B981', // Emerald
   '#8B5CF6', // Purple
   '#F97316', // Orange
   '#06B6D4', // Cyan
-  '#EF4444'  // Red
+  '#EF4444'  // Crimson
 ];
 
 export const FolderManager: React.FC<FolderManagerProps> = ({
@@ -63,6 +64,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   const [customCategory, setCustomCategory] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(PRESET_COLORS[0]);
+  const [showOnHome, setShowOnHome] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Delete modal
@@ -74,6 +76,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
     setCustomCategory('');
     setDescription('');
     setColor(PRESET_COLORS[0]);
+    setShowOnHome(false);
     setError(null);
     setIsCreating(false);
     setEditingFolder(null);
@@ -91,7 +94,19 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
     setCustomCategory(PRESET_CATEGORIES.includes(fld.category) ? '' : fld.category);
     setDescription(fld.description);
     setColor(fld.color);
+    setShowOnHome(Boolean(fld.showOnHome));
     setIsCreating(true);
+  };
+
+  const handleToggleHome = async (e: React.MouseEvent, fld: VaultFolder) => {
+    e.stopPropagation();
+    try {
+      const nextVal = !fld.showOnHome;
+      await api.admin.updateFolder(fld.id, { showOnHome: nextVal });
+      onFoldersChanged();
+    } catch (err) {
+      console.error('Failed to toggle folder home status:', err);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,14 +124,16 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
           name,
           category: finalCategory,
           description,
-          color
+          color,
+          showOnHome
         });
       } else {
         await api.admin.createFolder({
           name,
           category: finalCategory,
           description,
-          color
+          color,
+          showOnHome
         });
       }
       resetForm();
@@ -191,7 +208,20 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
                     <Folder className="w-5 h-5 fill-current" />
                   </div>
 
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleHome(e, fld)}
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                        fld.showOnHome
+                          ? 'bg-[#FF003C]/20 text-[#FF4D6D] border border-[#FF003C]/50 hover:bg-[#FF003C] hover:text-white shadow-[0_0_8px_rgba(255,0,60,0.3)]'
+                          : 'bg-[#121620] text-slate-400 border border-[#232A3B] hover:text-slate-200'
+                      }`}
+                      title={fld.showOnHome ? 'Shown on Home Screen (Click to hide)' : 'Vault Only (Click to show on Home Screen)'}
+                    >
+                      <Globe className="w-2.5 h-2.5" />
+                      <span>{fld.showOnHome ? 'Home: ON' : 'Home: OFF'}</span>
+                    </button>
                     <button
                       onClick={() => handleOpenEdit(fld)}
                       className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#1E2533] transition-colors"
@@ -340,8 +370,30 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="What is contained in this vault folder?"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#F5C518]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#FF003C]"
                 />
+              </div>
+
+              {/* Show on Home Screen Toggle */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#080A0E] border border-[#20131A]">
+                <div>
+                  <span className="text-white font-bold text-xs flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#FF003C]" />
+                    <span>Show on Home Screen</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                    Feature this folder on your public home screen for visitors.
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={showOnHome}
+                    onChange={(e) => setShowOnHome(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-[#20131A] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#FF003C]"></div>
+                </label>
               </div>
 
               <div className="flex justify-end space-x-2 pt-3 border-t border-[#1E2533]">
@@ -354,7 +406,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-gradient-to-r from-[#FF1E46] via-[#FF8A00] to-[#FFD000] hover:brightness-110 text-black font-bold rounded-xl cursor-pointer shadow-md shadow-[#FF1E46]/20"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#FF003C] to-[#C9002E] hover:from-[#FF1E46] hover:to-[#FF003C] text-white font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer shadow-[0_0_20px_rgba(255,0,60,0.45)] transition-all"
                 >
                   {editingFolder ? 'Update Folder' : 'Create Folder'}
                 </button>

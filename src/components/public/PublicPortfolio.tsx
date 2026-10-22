@@ -18,15 +18,21 @@ import {
   Twitter,
   Files,
   Link as LinkIcon,
-  Camera
+  Camera,
+  FolderTree,
+  Folder,
+  X,
+  ChevronRight,
+  Filter
 } from 'lucide-react';
 import {
   PublicPortfolioProfile,
   VaultFile,
-  VaultLink
+  VaultLink,
+  VaultFolder
 } from '../../types/vault';
 import { api } from '../../services/api';
-import { formatBytes, getCategoryBadgeColor } from '../../utils/formatters';
+import { formatBytes } from '../../utils/formatters';
 import { FilePreviewModal } from '../shared/FilePreviewModal';
 import { ChangePhotoModal } from '../admin/ChangePhotoModal';
 import { useAuth } from '../../context/AuthContext';
@@ -36,8 +42,12 @@ export const PublicPortfolio: React.FC = () => {
 
   const [profile, setProfile] = useState<PublicPortfolioProfile | null>(null);
   const [files, setFiles] = useState<VaultFile[]>([]);
+  const [folders, setFolders] = useState<VaultFolder[]>([]);
   const [links, setLinks] = useState<VaultLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Folder filtering state
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
 
   // Invisible photo clicks counter to secretly unlock Admin Portal
   const [photoClicks, setPhotoClicks] = useState(0);
@@ -58,7 +68,7 @@ export const PublicPortfolio: React.FC = () => {
   useEffect(() => {
     async function loadPublicData() {
       try {
-        const [profData, filesData, , linksData] = await Promise.all([
+        const [profData, filesData, foldersData, linksData] = await Promise.all([
           api.public.getProfile(),
           api.public.getFiles(),
           api.public.getFolders(),
@@ -66,6 +76,7 @@ export const PublicPortfolio: React.FC = () => {
         ]);
         setProfile(profData);
         setFiles(filesData);
+        setFolders(foldersData);
         setLinks(linksData);
       } catch (err) {
         console.error('Failed to load public portfolio data:', err);
@@ -102,11 +113,30 @@ export const PublicPortfolio: React.FC = () => {
     }
   };
 
-  // Search filtered files
-  const filteredFiles = useMemo(() => {
-    if (!search.trim()) return files;
+  // Search filtered folders
+  const filteredFolders = useMemo(() => {
+    if (!search.trim()) return folders;
     const q = search.toLowerCase();
-    return files.filter((file) => {
+    return folders.filter((fld) => {
+      const matchName = fld.name.toLowerCase().includes(q);
+      const matchDesc = (fld.description || '').toLowerCase().includes(q);
+      const matchCat = (fld.category || '').toLowerCase().includes(q);
+      return matchName || matchDesc || matchCat;
+    });
+  }, [folders, search]);
+
+  // Search and folder filtered files
+  const filteredFiles = useMemo(() => {
+    let result = files;
+
+    // Apply active folder filter if selected
+    if (selectedFolderId) {
+      result = result.filter((f) => f.folderId === selectedFolderId);
+    }
+
+    if (!search.trim()) return result;
+    const q = search.toLowerCase();
+    return result.filter((file) => {
       const matchTitle = (file.title || '').toLowerCase().includes(q);
       const matchName = (file.originalName || '').toLowerCase().includes(q);
       const matchDesc = (file.description || '').toLowerCase().includes(q);
@@ -114,7 +144,7 @@ export const PublicPortfolio: React.FC = () => {
       const matchTags = (file.tags || []).some((t) => t.toLowerCase().includes(q));
       return matchTitle || matchName || matchDesc || matchCategory || matchTags;
     });
-  }, [files, search]);
+  }, [files, search, selectedFolderId]);
 
   // Search filtered links
   const filteredLinks = useMemo(() => {
@@ -128,6 +158,11 @@ export const PublicPortfolio: React.FC = () => {
       return matchTitle || matchDesc || matchCategory || matchTags;
     });
   }, [links, search]);
+
+  const activeSelectedFolder = useMemo(() => {
+    if (!selectedFolderId) return null;
+    return folders.find((f) => f.id === selectedFolderId) || null;
+  }, [folders, selectedFolderId]);
 
   const handleSharePortfolio = () => {
     navigator.clipboard.writeText(window.location.origin + '/');
@@ -249,7 +284,7 @@ export const PublicPortfolio: React.FC = () => {
                 )}
               </div>
 
-              {/* Social Links (Website button removed per user request) */}
+              {/* Social Links */}
               <div className="pt-3 flex flex-wrap items-center justify-center md:justify-start gap-2.5">
                 {profile.socialLinks?.github && (
                   <a
@@ -301,37 +336,134 @@ export const PublicPortfolio: React.FC = () => {
         </div>
       </section>
 
-      {/* Main Home Page Content: ALL uploads and links shown on home */}
+      {/* Main Home Page Content: Folders, Files, and Links chosen to show on home */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
         {/* Search Bar */}
-        {(files.length > 2 || links.length > 1) && (
+        {(files.length > 2 || links.length > 1 || folders.length > 1) && (
           <div className="relative max-w-md mx-auto sm:mx-0">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search uploads and project links..."
+              placeholder="Search folders, files, and project links..."
               className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0B0E14] border border-[#20131A] text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#FF003C] focus:shadow-[0_0_20px_rgba(255,0,60,0.3)] transition-all"
             />
           </div>
         )}
 
-        {/* SECTION 1: UPLOADED FILES & WORK */}
+        {/* SECTION 1: FEATURED VAULT FOLDERS */}
+        {filteredFolders.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between border-b border-[#20131A] pb-3">
+              <h2 className="text-lg font-black text-white flex items-center gap-2">
+                <FolderTree className="w-5 h-5 text-[#FF003C]" />
+                <span>Featured Folders & Collections</span>
+              </h2>
+              <span className="text-xs font-mono text-slate-400">
+                {filteredFolders.length} folder{filteredFolders.length === 1 ? '' : 's'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredFolders.map((fld) => {
+                const isSelected = selectedFolderId === fld.id;
+                return (
+                  <div
+                    key={fld.id}
+                    onClick={() => setSelectedFolderId(isSelected ? null : fld.id)}
+                    className={`vault-panel rounded-2xl p-5 border transition-all cursor-pointer flex flex-col justify-between group ${
+                      isSelected
+                        ? 'border-[#FF003C] bg-[#140A10] shadow-[0_0_20px_rgba(255,0,60,0.35)] ring-1 ring-[#FF003C]'
+                        : 'border-[#20131A] hover:border-[#FF003C]/60 hover:bg-[#0E1118]'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-transform group-hover:scale-105"
+                          style={{
+                            backgroundColor: fld.color ? `${fld.color}15` : '#FF003C15',
+                            color: fld.color || '#FF003C',
+                            border: `1px solid ${fld.color ? `${fld.color}35` : '#FF003C35'}`
+                          }}
+                        >
+                          <Folder className="w-5 h-5 fill-current" />
+                        </div>
+
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#050608] text-[#FF4D6D] border border-[#20131A]">
+                          {fld.category}
+                        </span>
+                      </div>
+
+                      <h3 className="text-base font-bold text-white group-hover:text-[#FF003C] transition-colors mb-1">
+                        {fld.name}
+                      </h3>
+                      <p className="text-xs text-slate-400 line-clamp-2">
+                        {fld.description || 'Explore collection files.'}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-[#20131A] flex items-center justify-between text-xs text-slate-400">
+                      <span className="font-mono text-[11px] text-[#FF4D6D]">
+                        {fld.filesCount || 0} item{(fld.filesCount || 0) === 1 ? '' : 's'}
+                      </span>
+                      <span className="flex items-center gap-1 font-semibold text-xs text-white group-hover:text-[#FF003C]">
+                        <span>{isSelected ? 'Viewing' : 'Browse'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* SECTION 2: UPLOADED FILES & WORK */}
         <section className="space-y-5">
           <div className="flex items-center justify-between border-b border-[#20131A] pb-3">
-            <h2 className="text-lg font-black text-white flex items-center gap-2">
-              <Files className="w-5 h-5 text-[#FF003C]" />
-              <span>Uploaded Files & Work</span>
-            </h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-black text-white flex items-center gap-2">
+                <Files className="w-5 h-5 text-[#FF003C]" />
+                <span>Uploaded Files & Work</span>
+              </h2>
+
+              {activeSelectedFolder && (
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FF003C]/20 border border-[#FF003C]/50 text-white text-xs font-semibold">
+                  <Filter className="w-3 h-3 text-[#FF003C]" />
+                  <span>Folder: {activeSelectedFolder.name}</span>
+                  <button
+                    onClick={() => setSelectedFolderId(null)}
+                    className="p-0.5 hover:text-[#FF003C] transition-colors ml-1 cursor-pointer"
+                    title="Clear folder filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+
             <span className="text-xs font-mono text-slate-400">
               {filteredFiles.length} item{filteredFiles.length === 1 ? '' : 's'}
             </span>
           </div>
 
           {filteredFiles.length === 0 ? (
-            <div className="vault-panel rounded-2xl p-10 text-center text-slate-500 text-xs">
-              No files found matching your search.
+            <div className="vault-panel rounded-2xl p-10 text-center text-slate-400 text-xs border border-[#20131A]">
+              {selectedFolderId
+                ? 'No files found in this folder matching your filter.'
+                : 'No files currently chosen for the home screen.'}
+              {selectedFolderId && (
+                <div className="mt-3">
+                  <button
+                    onClick={() => setSelectedFolderId(null)}
+                    className="text-[#FF003C] hover:underline font-bold text-xs"
+                  >
+                    Clear folder filter
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -460,7 +592,7 @@ export const PublicPortfolio: React.FC = () => {
           )}
         </section>
 
-        {/* SECTION 2: PROJECT LINKS & REPOSITORIES */}
+        {/* SECTION 3: PROJECT LINKS & REPOSITORIES */}
         {filteredLinks.length > 0 && (
           <section className="space-y-5 pt-4">
             <div className="flex items-center justify-between border-b border-[#20131A] pb-3">

@@ -54,6 +54,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const [category, setCategory] = useState(defaultCategory);
   const [folderId, setFolderId] = useState<string | null>(defaultFolderId);
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
+  const [showOnHome, setShowOnHome] = useState(false);
   const [downloadAllowed, setDownloadAllowed] = useState(true);
   const [tagsInput, setTagsInput] = useState('');
   
@@ -130,6 +131,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
       formData.append('category', category);
       formData.append('folderId', folderId || '');
       formData.append('visibility', visibility);
+      formData.append('showOnHome', String(showOnHome));
       formData.append('downloadAllowed', String(downloadAllowed));
       formData.append('title', title);
       formData.append('description', description);
@@ -375,6 +377,28 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               </div>
             </div>
 
+            {/* Show on Home Screen Toggle */}
+            <div className="flex items-center justify-between pt-2 border-t border-[#1E2533] text-xs">
+              <div className="pr-3">
+                <span className="text-white font-bold flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-[#FF003C]" />
+                  <span>Feature on Home Screen</span>
+                </span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">
+                  If enabled, this file displays on your public home screen. Leave disabled to keep in vault only.
+                </span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={showOnHome}
+                  onChange={(e) => setShowOnHome(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-[#20131A] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#FF003C]"></div>
+              </label>
+            </div>
+
             {/* Download Policy */}
             <div className="flex items-center justify-between pt-2 border-t border-[#1E2533] text-xs">
               <div>
@@ -383,7 +407,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   If disabled, visitors can only view/read the file in browser.
                 </span>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
                 <input
                   type="checkbox"
                   checked={downloadAllowed}

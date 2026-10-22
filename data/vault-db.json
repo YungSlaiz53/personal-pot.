@@ -19,9 +19,9 @@
     "phone": "",
     "location": "Nigeria",
     "socialLinks": {
-      "github": "https://github.com",
-      "linkedin": "https://linkedin.com",
-      "twitter": "https://x.com"
+      "github": "https://github.com/YungSlaiz53",
+      "linkedin": "https://www.linkedin.com/in/blessed-oglekwu-247871409/",
+      "twitter": "https://x.com/ogleksb"
     },
     "defaultVisibility": "public",
     "defaultDownloadAllowed": true,
@@ -45,7 +45,8 @@
       "color": "#F5C518",
       "icon": "FileText",
       "createdAt": "2026-10-13T17:53:28.626Z",
-      "updatedAt": "2026-10-13T17:53:28.626Z"
+      "updatedAt": "2026-10-13T17:53:28.626Z",
+      "showOnHome": true
     },
     {
       "id": "fld_webdev",
@@ -55,7 +56,8 @@
       "color": "#3B82F6",
       "icon": "Code",
       "createdAt": "2026-10-13T17:53:28.626Z",
-      "updatedAt": "2026-10-13T17:53:28.626Z"
+      "updatedAt": "2026-10-13T17:53:28.626Z",
+      "showOnHome": true
     },
     {
       "id": "fld_design",
@@ -65,7 +67,8 @@
       "color": "#EC4899",
       "icon": "Palette",
       "createdAt": "2026-10-13T17:53:28.626Z",
-      "updatedAt": "2026-10-13T17:53:28.626Z"
+      "updatedAt": "2026-10-13T17:53:28.626Z",
+      "showOnHome": true
     },
     {
       "id": "fld_certs",
@@ -75,7 +78,8 @@
       "color": "#10B981",
       "icon": "Award",
       "createdAt": "2026-10-13T17:53:28.626Z",
-      "updatedAt": "2026-10-13T17:53:28.626Z"
+      "updatedAt": "2026-10-13T17:53:28.626Z",
+      "showOnHome": true
     },
     {
       "id": "fld_private_vault",
@@ -85,7 +89,8 @@
       "color": "#EF4444",
       "icon": "Lock",
       "createdAt": "2026-10-13T17:53:28.626Z",
-      "updatedAt": "2026-10-13T17:53:28.626Z"
+      "updatedAt": "2026-10-13T17:53:28.626Z",
+      "showOnHome": true
     }
   ],
   "files": [
@@ -113,7 +118,8 @@
       "isDeleted": true,
       "createdAt": "2026-10-09T17:53:28.626Z",
       "updatedAt": "2026-10-14T10:20:17.747Z",
-      "deletedAt": "2026-10-14T10:20:17.747Z"
+      "deletedAt": "2026-10-14T10:20:17.747Z",
+      "showOnHome": false
     },
     {
       "id": "file_spec_02",
@@ -139,7 +145,8 @@
       "isDeleted": true,
       "createdAt": "2026-10-10T17:53:28.626Z",
       "updatedAt": "2026-10-14T10:20:16.150Z",
-      "deletedAt": "2026-10-14T10:20:16.150Z"
+      "deletedAt": "2026-10-14T10:20:16.150Z",
+      "showOnHome": false
     },
     {
       "id": "file_design_03",
@@ -165,7 +172,8 @@
       "isDeleted": true,
       "createdAt": "2026-10-11T17:53:28.626Z",
       "updatedAt": "2026-10-14T10:20:13.826Z",
-      "deletedAt": "2026-10-14T10:20:13.826Z"
+      "deletedAt": "2026-10-14T10:20:13.826Z",
+      "showOnHome": false
     },
     {
       "id": "file_cert_04",
@@ -191,7 +199,8 @@
       "isDeleted": true,
       "createdAt": "2026-10-12T17:53:28.626Z",
       "updatedAt": "2026-10-14T10:20:11.619Z",
-      "deletedAt": "2026-10-14T10:20:11.619Z"
+      "deletedAt": "2026-10-14T10:20:11.619Z",
+      "showOnHome": false
     },
     {
       "id": "file_priv_05",
@@ -216,7 +225,8 @@
       "isDeleted": true,
       "createdAt": "2026-10-13T17:53:28.626Z",
       "updatedAt": "2026-10-14T10:20:06.819Z",
-      "deletedAt": "2026-10-14T10:20:06.819Z"
+      "deletedAt": "2026-10-14T10:20:06.819Z",
+      "showOnHome": false
     }
   ],
   "links": [],

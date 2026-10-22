@@ -37,6 +37,7 @@ interface VaultFile {
   folderId: string | null;
   tags: string[];
   visibility: 'public' | 'private';
+  showOnHome?: boolean;
   downloadAllowed: boolean;
   downloadsCount: number;
   viewsCount: number;
@@ -53,6 +54,7 @@ interface VaultFolder {
   description: string;
   color: string;
   icon?: string;
+  showOnHome?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -66,6 +68,7 @@ interface VaultLink {
   tags: string[];
   thumbnailUrl?: string;
   visibility: 'public' | 'private';
+  showOnHome?: boolean;
   clicksCount: number;
   createdAt: string;
   updatedAt: string;
@@ -306,9 +309,9 @@ Object assets are isolated from metadata indexing to prevent single-point bottle
       phone: '',
       location: 'Nigeria',
       socialLinks: {
-        github: 'https://github.com',
-        linkedin: 'https://linkedin.com',
-        twitter: 'https://x.com'
+        github: 'https://github.com/YungSlaiz53',
+        linkedin: 'https://www.linkedin.com/in/blessed-oglekwu-247871409/',
+        twitter: 'https://x.com/ogleksb'
       },
       defaultVisibility: 'public',
       defaultDownloadAllowed: true,
@@ -550,10 +553,14 @@ Object assets are isolated from metadata indexing to prevent single-point bottle
 let db: VaultDatabase = initDatabase();
 
 // Ensure DB has the requested BLESSED DAVID OGLEKWU brand and admin credentials
+let dbDirty = false;
 if (
   db.settings.portfolioName !== 'BLESSED DAVID OGLEKWU' ||
   db.admin.email !== 'Blessed' ||
   db.settings.location !== 'Nigeria' ||
+  db.settings.socialLinks?.github !== 'https://github.com/YungSlaiz53' ||
+  db.settings.socialLinks?.linkedin !== 'https://www.linkedin.com/in/blessed-oglekwu-247871409/' ||
+  db.settings.socialLinks?.twitter !== 'https://x.com/ogleksb' ||
   db.settings.socialLinks?.website
 ) {
   db.settings.portfolioName = 'BLESSED DAVID OGLEKWU';
@@ -561,11 +568,46 @@ if (
   db.admin.name = 'BLESSED DAVID OGLEKWU';
   db.admin.email = 'Blessed';
   db.settings.location = 'Nigeria';
-  if (db.settings.socialLinks) {
-    delete db.settings.socialLinks.website;
-  }
+  db.settings.socialLinks = {
+    github: 'https://github.com/YungSlaiz53',
+    linkedin: 'https://www.linkedin.com/in/blessed-oglekwu-247871409/',
+    twitter: 'https://x.com/ogleksb'
+  };
   db.admin.salt = crypto.randomBytes(16).toString('hex');
   db.admin.passwordHash = hashPassword('Oglekwu', db.admin.salt);
+  dbDirty = true;
+}
+
+// Ensure showOnHome property exists and hide avatars / link thumbnails from home screen
+db.files.forEach(f => {
+  const isInternalPhotoOrThumb =
+    f.id.startsWith('photo_') ||
+    (f.tags && (f.tags.includes('Avatar') || f.tags.includes('ProfilePhoto') || f.tags.includes('Thumbnail')));
+  if (isInternalPhotoOrThumb) {
+    f.showOnHome = false;
+    f.visibility = 'private';
+    dbDirty = true;
+  } else if (f.showOnHome === undefined) {
+    f.showOnHome = f.visibility === 'public' && !f.isDeleted;
+    dbDirty = true;
+  }
+});
+
+db.folders.forEach(fld => {
+  if (fld.showOnHome === undefined) {
+    fld.showOnHome = true;
+    dbDirty = true;
+  }
+});
+
+db.links.forEach(l => {
+  if (l.showOnHome === undefined) {
+    l.showOnHome = l.visibility === 'public';
+    dbDirty = true;
+  }
+});
+
+if (dbDirty) {
   fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
 }
 
@@ -637,10 +679,10 @@ app.get('/api/public/profile', (_req, res) => {
   });
 });
 
-// 2. Public Files (Strict: Only public & not deleted)
+// 2. Public Files (Strict: Only public, not deleted, and explicitly selected to show on home screen)
 app.get('/api/public/files', (_req, res) => {
   const publicFiles = db.files
-    .filter(f => f.visibility === 'public' && !f.isDeleted)
+    .filter(f => f.visibility === 'public' && !f.isDeleted && f.showOnHome === true)
     .map(f => ({
       id: f.id,
       title: f.title,
@@ -651,6 +693,7 @@ app.get('/api/public/files', (_req, res) => {
       size: f.size,
       tags: f.tags,
       originalName: f.originalName,
+      showOnHome: true,
       downloadAllowed: f.downloadAllowed,
       downloadsCount: f.downloadsCount,
       viewsCount: f.viewsCount,
@@ -660,20 +703,25 @@ app.get('/api/public/files', (_req, res) => {
   res.json(publicFiles);
 });
 
-// 3. Public Folders
+// 3. Public Folders (Strict: Only folders marked to show on home screen)
 app.get('/api/public/folders', (_req, res) => {
-  // Only return folders that have public files or are registered in public categories
-  const publicFolderIds = new Set(
-    db.files.filter(f => f.visibility === 'public' && !f.isDeleted).map(f => f.folderId).filter(Boolean)
-  );
-  const publicFolders = db.folders.filter(fld => publicFolderIds.has(fld.id) || db.settings.visibleCategories.includes(fld.category));
+  const publicFolders = db.folders
+    .filter(fld => fld.showOnHome === true)
+    .map(fld => {
+      const fldFiles = db.files.filter(f => f.folderId === fld.id && f.visibility === 'public' && !f.isDeleted && f.showOnHome === true);
+      return {
+        ...fld,
+        filesCount: fldFiles.length,
+        storageBytes: fldFiles.reduce((acc, f) => acc + (f.size || 0), 0)
+      };
+    });
   res.json(publicFolders);
 });
 
-// 4. Public Links
+// 4. Public Links (Strict: Only public & selected to show on home screen)
 app.get('/api/public/links', (_req, res) => {
   const publicLinks = db.links
-    .filter(l => l.visibility === 'public')
+    .filter(l => l.visibility === 'public' && l.showOnHome === true)
     .map(l => ({
       id: l.id,
       title: l.title,
@@ -682,6 +730,7 @@ app.get('/api/public/links', (_req, res) => {
       category: l.category,
       tags: l.tags,
       thumbnailUrl: l.thumbnailUrl,
+      showOnHome: true,
       clicksCount: l.clicksCount,
       createdAt: l.createdAt
     }));
@@ -1025,6 +1074,7 @@ app.post('/api/admin/files/upload', requireAdmin, upload.array('files', 15), (re
     folderId = null,
     visibility = db.settings.defaultVisibility || 'public',
     downloadAllowed = String(db.settings.defaultDownloadAllowed !== false),
+    showOnHome = 'false',
     tags = '[]',
     title = '',
     description = ''
@@ -1059,6 +1109,7 @@ app.post('/api/admin/files/upload', requireAdmin, upload.array('files', 15), (re
       folderId: cleanFolderId,
       tags: parsedTags,
       visibility: visibility === 'private' ? 'private' : 'public',
+      showOnHome: showOnHome === 'true' || showOnHome === true,
       downloadAllowed: downloadAllowed === 'true' || downloadAllowed === true,
       downloadsCount: 0,
       viewsCount: 0,
@@ -1083,7 +1134,7 @@ app.put('/api/admin/files/:id', requireAdmin, (req, res) => {
     return;
   }
 
-  const { title, description, category, folderId, tags, visibility, downloadAllowed } = req.body;
+  const { title, description, category, folderId, tags, visibility, downloadAllowed, showOnHome } = req.body;
   if (title !== undefined) file.title = String(title);
   if (description !== undefined) file.description = String(description);
   if (category !== undefined) file.category = String(category);
@@ -1091,6 +1142,7 @@ app.put('/api/admin/files/:id', requireAdmin, (req, res) => {
   if (tags !== undefined) file.tags = Array.isArray(tags) ? tags : [];
   if (visibility !== undefined) file.visibility = visibility === 'private' ? 'private' : 'public';
   if (downloadAllowed !== undefined) file.downloadAllowed = Boolean(downloadAllowed);
+  if (showOnHome !== undefined) file.showOnHome = Boolean(showOnHome);
 
   file.updatedAt = new Date().toISOString();
   saveDatabase();
@@ -1211,7 +1263,7 @@ app.get('/api/admin/folders', requireAdmin, (_req, res) => {
 });
 
 app.post('/api/admin/folders', requireAdmin, (req, res) => {
-  const { name, category = 'General', description = '', color = '#F5C518', icon = 'Folder' } = req.body;
+  const { name, category = 'General', description = '', color = '#FF003C', icon = 'Folder', showOnHome = false } = req.body;
   if (!name || !String(name).trim()) {
     res.status(400).json({ error: 'Folder name is required' });
     return;
@@ -1224,6 +1276,7 @@ app.post('/api/admin/folders', requireAdmin, (req, res) => {
     description: String(description).trim(),
     color: String(color),
     icon: String(icon),
+    showOnHome: showOnHome === 'true' || showOnHome === true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -1239,12 +1292,13 @@ app.put('/api/admin/folders/:id', requireAdmin, (req, res) => {
     res.status(404).json({ error: 'Folder not found' });
     return;
   }
-  const { name, category, description, color, icon } = req.body;
+  const { name, category, description, color, icon, showOnHome } = req.body;
   if (name !== undefined) folder.name = String(name).trim();
   if (category !== undefined) folder.category = String(category).trim();
   if (description !== undefined) folder.description = String(description).trim();
   if (color !== undefined) folder.color = String(color);
   if (icon !== undefined) folder.icon = String(icon);
+  if (showOnHome !== undefined) folder.showOnHome = Boolean(showOnHome);
   folder.updatedAt = new Date().toISOString();
   saveDatabase();
   res.json(folder);
@@ -1300,8 +1354,9 @@ app.post('/api/admin/links/upload-thumbnail', requireAdmin, upload.single('thumb
     category: 'Resources and Links',
     folderId: null,
     tags: ['Thumbnail', 'LinkAsset'],
-    visibility: 'public',
-    downloadAllowed: true,
+    visibility: 'private',
+    showOnHome: false,
+    downloadAllowed: false,
     downloadsCount: 0,
     viewsCount: 0,
     isDeleted: false,
@@ -1319,7 +1374,7 @@ app.post('/api/admin/links/upload-thumbnail', requireAdmin, upload.single('thumb
 });
 
 app.post('/api/admin/links', requireAdmin, (req, res) => {
-  const { title, url, description = '', category = 'Resources and Links', tags = [], thumbnailUrl = '', visibility = 'public' } = req.body;
+  const { title, url, description = '', category = 'Resources and Links', tags = [], thumbnailUrl = '', visibility = 'public', showOnHome = false } = req.body;
   if (!title || !url) {
     res.status(400).json({ error: 'Title and URL are required' });
     return;
@@ -1334,6 +1389,7 @@ app.post('/api/admin/links', requireAdmin, (req, res) => {
     tags: Array.isArray(tags) ? tags : [],
     thumbnailUrl: String(thumbnailUrl || ''),
     visibility: visibility === 'private' ? 'private' : 'public',
+    showOnHome: showOnHome === 'true' || showOnHome === true,
     clicksCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -1350,7 +1406,7 @@ app.put('/api/admin/links/:id', requireAdmin, (req, res) => {
     res.status(404).json({ error: 'Link not found' });
     return;
   }
-  const { title, url, description, category, tags, thumbnailUrl, visibility } = req.body;
+  const { title, url, description, category, tags, thumbnailUrl, visibility, showOnHome } = req.body;
   if (title !== undefined) link.title = String(title).trim();
   if (url !== undefined) link.url = String(url).trim();
   if (description !== undefined) link.description = String(description).trim();
@@ -1358,6 +1414,7 @@ app.put('/api/admin/links/:id', requireAdmin, (req, res) => {
   if (tags !== undefined) link.tags = Array.isArray(tags) ? tags : [];
   if (thumbnailUrl !== undefined) link.thumbnailUrl = String(thumbnailUrl);
   if (visibility !== undefined) link.visibility = visibility === 'private' ? 'private' : 'public';
+  if (showOnHome !== undefined) link.showOnHome = Boolean(showOnHome);
   link.updatedAt = new Date().toISOString();
   saveDatabase();
   res.json(link);
@@ -1411,8 +1468,9 @@ app.post('/api/admin/photo/upload', requireAdmin, upload.single('photo'), (req, 
     category: 'Documents',
     folderId: null,
     tags: ['Avatar', 'ProfilePhoto'],
-    visibility: 'public',
-    downloadAllowed: true,
+    visibility: 'private',
+    showOnHome: false,
+    downloadAllowed: false,
     downloadsCount: 0,
     viewsCount: 0,
     isDeleted: false,

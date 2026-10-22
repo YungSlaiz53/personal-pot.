@@ -66,6 +66,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
   const [editFolderId, setEditFolderId] = useState<string | null>(null);
   const [editTags, setEditTags] = useState('');
   const [editVisibility, setEditVisibility] = useState<'public' | 'private'>('public');
+  const [editShowOnHome, setEditShowOnHome] = useState(false);
   const [editDownloadAllowed, setEditDownloadAllowed] = useState(true);
 
   // Delete confirmation
@@ -135,6 +136,17 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
     setSelectedIds(next);
   };
 
+  const handleToggleHome = async (e: React.MouseEvent, file: VaultFile) => {
+    e.stopPropagation();
+    try {
+      const nextVal = !file.showOnHome;
+      await api.admin.updateFile(file.id, { showOnHome: nextVal });
+      onFilesChanged();
+    } catch (err) {
+      console.error('Failed to toggle home screen status:', err);
+    }
+  };
+
   const openEditModal = (file: VaultFile) => {
     setEditingFile(file);
     setEditTitle(file.title || file.originalName);
@@ -143,6 +155,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
     setEditFolderId(file.folderId);
     setEditTags((file.tags || []).join(', '));
     setEditVisibility(file.visibility);
+    setEditShowOnHome(Boolean(file.showOnHome));
     setEditDownloadAllowed(file.downloadAllowed);
   };
 
@@ -159,6 +172,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
         folderId: editFolderId,
         tags: parsedTags,
         visibility: editVisibility,
+        showOnHome: editShowOnHome,
         downloadAllowed: editDownloadAllowed
       });
       setEditingFile(null);
@@ -480,8 +494,22 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
                       )}
                     </button>
 
-                    {/* Visibility Tag */}
+                    {/* Top Overlay Badges: Visibility and Home Screen 1-Click Toggle */}
                     <div className="flex items-center space-x-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => handleToggleHome(e, file)}
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                          file.showOnHome
+                            ? 'bg-[#FF003C]/30 text-white border border-[#FF003C] shadow-[0_0_10px_rgba(255,0,60,0.5)] hover:bg-[#FF003C]'
+                            : 'bg-black/70 text-slate-400 border border-slate-700 hover:text-white hover:border-slate-500'
+                        }`}
+                        title={file.showOnHome ? 'Shown on Home Screen (Click to hide)' : 'Vault Only (Click to show on Home Screen)'}
+                      >
+                        <Globe className="w-2.5 h-2.5" />
+                        <span>{file.showOnHome ? 'Home: ON' : 'Home: OFF'}</span>
+                      </button>
+
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded-full font-semibold backdrop-blur-md ${
                           file.visibility === 'public'
@@ -581,6 +609,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
                   <th className="p-3.5">Category</th>
                   <th className="p-3.5">Folder</th>
                   <th className="p-3.5">Size</th>
+                  <th className="p-3.5">Home Screen</th>
                   <th className="p-3.5">Visibility</th>
                   <th className="p-3.5">Uploaded</th>
                   <th className="p-3.5 text-right">Actions</th>
@@ -615,7 +644,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
                       </td>
                       <td className="p-3.5 font-medium text-slate-200">
                         <div className="flex items-center space-x-2.5">
-                          <div className="w-7 h-7 rounded-lg bg-[#0E121A] border border-[#232A3B] flex items-center justify-center text-[#F5C518] shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-[#0E121A] border border-[#232A3B] flex items-center justify-center text-[#FF003C] shrink-0">
                             <File className="w-3.5 h-3.5" />
                           </div>
                           <div className="min-w-0">
@@ -638,7 +667,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
                       <td className="p-3.5 text-slate-400">
                         {folder ? (
                           <span className="flex items-center gap-1">
-                            <FolderIcon className="w-3 h-3 text-[#F5C518]" />
+                            <FolderIcon className="w-3 h-3 text-[#FF003C]" />
                             {folder.name}
                           </span>
                         ) : (
@@ -646,6 +675,21 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
                         )}
                       </td>
                       <td className="p-3.5 font-mono text-slate-300">{formatBytes(file.size)}</td>
+                      <td className="p-3.5" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleHome(e, file)}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                            file.showOnHome
+                              ? 'bg-[#FF003C]/20 text-[#FF4D6D] border border-[#FF003C]/50 hover:bg-[#FF003C] hover:text-white shadow-[0_0_8px_rgba(255,0,60,0.3)]'
+                              : 'bg-[#121620] text-slate-400 border border-[#232A3B] hover:text-slate-200 hover:border-slate-500'
+                          }`}
+                          title={file.showOnHome ? 'Click to hide from Home Screen' : 'Click to show on Home Screen'}
+                        >
+                          <Globe className="w-2.5 h-2.5" />
+                          <span>{file.showOnHome ? 'Visible' : 'Hidden'}</span>
+                        </button>
+                      </td>
                       <td className="p-3.5">
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
@@ -793,7 +837,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
                   <select
                     value={editVisibility}
                     onChange={(e) => setEditVisibility(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#F5C518]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#FF003C]"
                   >
                     <option value="public">Public Portfolio</option>
                     <option value="private">Private Vault Only</option>
@@ -813,6 +857,28 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
                 </div>
               </div>
 
+              {/* Show on Home Screen Toggle */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#080A0E] border border-[#20131A]">
+                <div>
+                  <span className="text-white font-bold text-xs flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#FF003C]" />
+                    <span>Show on Home Screen</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                    Choose whether this file is displayed publicly on your portfolio home screen.
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={editShowOnHome}
+                    onChange={(e) => setEditShowOnHome(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-[#20131A] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#FF003C]"></div>
+                </label>
+              </div>
+
               <div className="flex justify-end space-x-2 pt-4 border-t border-[#1E2533]">
                 <button
                   type="button"
@@ -823,7 +889,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-gradient-to-r from-[#FF1E46] via-[#FF8A00] to-[#FFD000] hover:brightness-110 text-black font-bold rounded-xl cursor-pointer shadow-md shadow-[#FF1E46]/20"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#FF003C] to-[#C9002E] hover:from-[#FF1E46] hover:to-[#FF003C] text-white font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer shadow-[0_0_20px_rgba(255,0,60,0.45)] transition-all"
                 >
                   Save Changes
                 </button>

@@ -10,6 +10,7 @@ export interface VaultFile {
   folderId: string | null;
   tags: string[];
   visibility: 'public' | 'private';
+  showOnHome?: boolean;
   downloadAllowed: boolean;
   downloadsCount: number;
   viewsCount: number;
@@ -26,6 +27,7 @@ export interface VaultFolder {
   description: string;
   color: string;
   icon?: string;
+  showOnHome?: boolean;
   filesCount?: number;
   storageBytes?: number;
   createdAt: string;
@@ -41,6 +43,7 @@ export interface VaultLink {
   tags: string[];
   thumbnailUrl?: string;
   visibility: 'public' | 'private';
+  showOnHome?: boolean;
   clicksCount: number;
   createdAt: string;
   updatedAt: string;

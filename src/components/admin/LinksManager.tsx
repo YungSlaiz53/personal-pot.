@@ -52,6 +52,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
   const [tagsInput, setTagsInput] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
+  const [showOnHome, setShowOnHome] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Thumbnail upload states
@@ -68,6 +69,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
     setTagsInput('');
     setThumbnailUrl('');
     setVisibility('public');
+    setShowOnHome(false);
     setError(null);
     setEditingLink(null);
     setIsModalOpen(false);
@@ -88,9 +90,21 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
     setTagsInput((link.tags || []).join(', '));
     setThumbnailUrl(link.thumbnailUrl || '');
     setVisibility(link.visibility);
+    setShowOnHome(Boolean(link.showOnHome));
     setError(null);
     setIsModalOpen(true);
     setIsUploadingThumbnail(false);
+  };
+
+  const handleToggleHome = async (e: React.MouseEvent, link: VaultLink) => {
+    e.stopPropagation();
+    try {
+      const nextVal = !link.showOnHome;
+      await api.admin.updateLink(link.id, { showOnHome: nextVal });
+      onLinksChanged();
+    } catch (err) {
+      console.error('Failed to toggle link home status:', err);
+    }
   };
 
   const handleThumbnailFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +156,8 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
           category,
           tags: parsedTags,
           thumbnailUrl,
-          visibility
+          visibility,
+          showOnHome
         });
       } else {
         await api.admin.createLink({
@@ -152,7 +167,8 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
           category,
           tags: parsedTags,
           thumbnailUrl,
-          visibility
+          visibility,
+          showOnHome
         });
       }
       resetForm();
@@ -277,6 +293,19 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#1B212D] text-slate-300 border border-[#2B3548]">
                       {link.category}
                     </span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleHome(e, link)}
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                        link.showOnHome
+                          ? 'bg-[#FF003C]/20 text-[#FF4D6D] border border-[#FF003C]/50 hover:bg-[#FF003C] hover:text-white shadow-[0_0_8px_rgba(255,0,60,0.3)]'
+                          : 'bg-[#121620] text-slate-400 border border-[#232A3B] hover:text-slate-200'
+                      }`}
+                      title={link.showOnHome ? 'Shown on Home Screen (Click to hide)' : 'Vault Only (Click to show on Home Screen)'}
+                    >
+                      <Globe className="w-2.5 h-2.5" />
+                      <span>{link.showOnHome ? 'Home: ON' : 'Home: OFF'}</span>
+                    </button>
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded font-semibold ${
                         link.visibility === 'public'
@@ -501,12 +530,34 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
                   <select
                     value={visibility}
                     onChange={(e) => setVisibility(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#F5C518]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#FF003C]"
                   >
                     <option value="public">Public Portfolio</option>
                     <option value="private">Private Vault Only</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Show on Home Screen Toggle */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#080A0E] border border-[#20131A]">
+                <div>
+                  <span className="text-white font-bold text-xs flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#FF003C]" />
+                    <span>Show on Home Screen</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                    Feature this repository / link on your public home screen.
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={showOnHome}
+                    onChange={(e) => setShowOnHome(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-[#20131A] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#FF003C]"></div>
+                </label>
               </div>
 
               <div>
@@ -518,7 +569,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
                   value={tagsInput}
                   onChange={(e) => setTagsInput(e.target.value)}
                   placeholder="GitHub, OpenSource, Demo"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#F5C518]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#FF003C]"
                 />
               </div>
 
@@ -529,7 +580,7 @@ export const LinksManager: React.FC<LinksManagerProps> = ({ links, onLinksChange
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="What is this repository or project link?"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#F5C518]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0E121A] border border-[#232A3B] text-white focus:outline-none focus:border-[#FF003C]"
                 />
               </div>
 
